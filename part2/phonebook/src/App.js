@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+
+import axios from 'axios'
 
 const Filter = ({value, onChange}) => <input value={value} onChange={onChange} />
 
@@ -18,16 +20,17 @@ const PersonForm = (props) => <form onSubmit={props.onSubmit}>
 </form>
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '040-123456', id: 1 },
-    { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
-    { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
-    { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 }
-  ])
+  const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState(111)
   const [showAll, setShowAll] = useState(true)
   const [nameSearch, setNameSearch] = useState('')
+
+  useEffect(() => {
+    axios
+      .get('http://localhost:3001/persons')
+      .then(response => setPersons(response.data))
+  }, [])
 
   const nameChangeHandler = (event) => {
     setNewName(event.target.value);
@@ -50,14 +53,19 @@ const App = () => {
     event.preventDefault()
     const newPerson = {
       name: newName,
-      number: newNumber,
-      id: persons.length + 1
+      number: newNumber
     }
     if (persons.some(person => person.name === newPerson.name)) {
       alert(`${newPerson.name} is already added to phonebook`)
     }
     else {
-      setPersons(persons.concat(newPerson))
+      axios
+        .post('http://localhost:3001/persons', newPerson)
+        .then(response => {
+          setPersons(persons.concat(response.data))
+          setNewName('')
+          setNewNumber(111)
+        })
     }
     
   }
