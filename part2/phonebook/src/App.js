@@ -4,6 +4,36 @@ import personService from './services/persons.js'
 
 const Filter = ({value, onChange}) => <input value={value} onChange={onChange} />
 
+const Notification = ({message}) => {
+  if (message == null) {
+    return null
+  }
+  const notifStyleSuccess = {
+    color: 'green',
+    background: 'lightgrey',
+    fontSize: 20,
+    borderStyle: 'solid',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+}
+
+const notifStyleUnsuccess = {
+  color: 'red',
+  background: 'lightgrey',
+  fontSize: 20,
+  borderStyle: 'solid',
+  borderRadius: 5,
+  padding: 10,
+  marginBottom: 10,
+}
+  return (
+    <div style={(message[1])?notifStyleSuccess:notifStyleUnsuccess}>
+      {message[0]}
+    </div>
+  )
+}
+
 const Input = ({name, value, onChange}) => <div>{name}: <input value={value} onChange={onChange} /></div>
 
 const Persons = ({personsToShow, removePerson}) => 
@@ -25,6 +55,7 @@ const App = () => {
   const [newNumber, setNewNumber] = useState(111)
   const [showAll, setShowAll] = useState(true)
   const [nameSearch, setNameSearch] = useState('')
+  const [notification, setNotification] = useState(['some notification', true])
 
   useEffect(() => {
     personService
@@ -65,6 +96,17 @@ const App = () => {
           .update(id, newPerson )
           .then(returnedperson => {
             setPersons(persons.map(p=>p.id !== id? p:returnedperson))
+            setNotification([`Updated ${returnedperson.name}`, true])
+            setTimeout(()=>{
+              setNotification(null)
+            }, 5000)
+          })
+          .catch(error => {
+            setNotification([`Information of ${newPerson.name} has already been removed from server`, false])
+            setTimeout(()=>{
+              setNotification(null)
+            }, 5000)
+            setPersons(persons.filter(p=>p.id!==id))
           })
       }
     }
@@ -75,6 +117,10 @@ const App = () => {
           setPersons(persons.concat(returnedPerson))
           setNewName('')
           setNewNumber(111)
+          setNotification([`Added ${newPerson.name}`, true])
+          setTimeout(()=>{
+            setNotification(null)
+          }, 5000)
         })
     }
     
@@ -85,15 +131,20 @@ const App = () => {
     if (confirmation) {
       personService
       .remove(id)
-      .then(
+      .then(() => {
+        setNotification([`Deleted ${persons.find(p=>p.id===id).name}`, true])
         setPersons(persons.filter(p=>p.id!==id))
-      )
+        setTimeout(()=>{
+          setNotification(null)
+        }, 5000)
+      })
     }
   }
   const personsToShow = showAll?persons:persons.filter(person => person.name.toLowerCase().includes(nameSearch.toLowerCase()))
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notification}/>
       <div>filter shown with <Filter value={nameSearch} onChange={handleNameSearchChange}/></div>
       <PersonForm onSubmit={addPerson} newName={newName} newNumber={newNumber} nameChangeHandler={nameChangeHandler} numberChangeHandler={numberChangeHandler}/>
       <h2>Numbers</h2>
