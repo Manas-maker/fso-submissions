@@ -55,7 +55,7 @@ const App = () => {
   const [newNumber, setNewNumber] = useState(111)
   const [showAll, setShowAll] = useState(true)
   const [nameSearch, setNameSearch] = useState('')
-  const [notification, setNotification] = useState(['some notification', true])
+  const [notification, setNotification] = useState(null)
 
   useEffect(() => {
     personService

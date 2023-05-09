@@ -10,6 +10,7 @@ const ShowData = ({countries, viewCountry, onShowClick, api_key}) => {
       .get(`https://api.openweathermap.org/data/2.5/weather?lat=${countries[viewCountry===-1?0:viewCountry].capitalInfo.latlng[0]}&lon=${countries[viewCountry===-1?0:viewCountry].capitalInfo.latlng[1]}&appid=${api_key}&units=metric`)
       .then(response => {
         setWeatherData([response.data.main.temp, response.data.weather[0].icon, response.data.wind.speed])
+        console.log(response)
       })}
   }, [api_key, countries, viewCountry])
     
